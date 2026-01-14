@@ -1,3 +1,6 @@
+# input: 依赖 numpy/matplotlib/ratinabox.utils 等库，需传入 Agent/Environment 实例
+# output: 提供各类神经元模型与状态/绘图 API
+# pos: 核心神经元模块，更新时请同步检查 ratinabox 目录说明
 import ratinabox
 
 import copy
@@ -350,9 +353,13 @@ class Neurons:
             fig, ax
         """
         #Set kwargs (TODO make lots of params accessible here as kwargs) 
-        spikes_color = kwargs.get("spikes_color", self.color) or "C1"
+        spikes_color = kwargs.get("spikes_color", None)
+        if spikes_color is None:
+            spikes_color = self.color if self.color is not None else "C1"
         spikes_size = kwargs.get("spikes_size", (5 if self.Agent.Environment.dimensionality == "2D" else 2))
-        color = kwargs.pop("color", self.color) or "C1"
+        color = kwargs.pop("color", None)
+        if color is None:
+            color = self.color if self.color is not None else "C1"
         bin_size = kwargs.get("bin_size", 0.04) #only relevant if you are plotting by method="history"
         optimise_plot_for_single_neuron = kwargs.get("optimise_plot_for_single_neuron", False) #if True will optimise the plot for when you are only visualising the rate map of a single neuron (e.g. chosen_neurons = [5], if False will plot as a mountain plot
         

@@ -1,6 +1,10 @@
 # TO DO: write more detailed tests 
 # For now, test_advanced will simply try to run versions of the "simple", "extensive" and "decoding_position" demo scripts. Assuming no error is raised the test has passed. It will also test whether external data (Sargolini) can be imported to test data availability. 
 # This is an okay safety net for now but should be improved in future versions
+# 待办事项：编写更详细的测试用例
+# 目前，test_advanced 仅尝试运行“simple”、“extensive”和“decoding_position”三个演示脚本的变体。只要没有报错就视为测试通过。
+# 它还会测试是否可以导入外部数据（如 Sargolini），用于验证测试数据的可用性。
+# 现在这样可以作为一个安全网，但将来版本需要进一步完善和改进
 
 #this test requires scikitlearn 
 
