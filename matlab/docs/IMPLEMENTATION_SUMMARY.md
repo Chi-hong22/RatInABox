@@ -1,3 +1,9 @@
+<!--
+input: MATLAB 端核心类与 demo 实现
+output: 实现清单、差异说明与更新记录
+pos: matlab/docs 实现摘要文档
+一旦我被更新，务必更新我的开头注释，以及所属的文件夹的md。
+-->
 # MATLAB Port Implementation Summary
 
 ## 完成状态
@@ -208,3 +214,6 @@ ls('matlab/output/*.png');
   - 绘图工具：paper_visual/plot_utils
   - Demo 脚本：demo_agent_line/demo_gridcells_visual
   - 文档：README/VERIFICATION/SUMMARY
+- 2026-01-15: 历史数组整理修正
+  - Neurons.get_history_arrays 保证历史矩阵为 T×n 形状
+

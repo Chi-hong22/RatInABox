@@ -9,14 +9,14 @@ function cfg = config()
     
     %% ==================== 环境参数 ====================
     % 矩形环境，单位：米
-    cfg.env.extent = [0, 1, 0, 1];           % [xmin, xmax, ymin, ymax]
+    cfg.env.extent = [0, 10, 0, 10];           % [xmin, xmax, ymin, ymax]
     cfg.env.boundary_conditions = 'solid';   % 边界条件：solid
     cfg.env.dimensionality = '2D';
     cfg.env.dx = 0.01;                       % 离散化分辨率 (m)
     
     %% ==================== Agent 参数 ====================
     cfg.agent.dt = 0.01;                     % 时间步长 (s)
-    cfg.agent.speed_mean = 0.08;             % 平均速度 (m/s)
+    cfg.agent.speed_mean = 0.1;             % 平均速度 (m/s)
     cfg.agent.speed_std = 0.0;               % 速度标准差
     
     %% ==================== Neurons 基类参数 ====================
@@ -29,14 +29,14 @@ function cfg = config()
     %% ==================== PlaceCells 参数 ====================
     cfg.place.n = 10;                        % 细胞数量
     cfg.place.description = 'gaussian';      % 类型：gaussian/gaussian_threshold/diff_of_gaussians/one_hot/top_hat
-    cfg.place.widths = 0.20;                 % 感受野宽度 (m)
-    cfg.place.wall_geometry = 'geodesic';    % 距离计算：euclidean/geodesic/line_of_sight
+    cfg.place.widths = 1;                 % 感受野宽度 (m)
+    cfg.place.wall_geometry = 'euclidean';    % 距离计算：euclidean/geodesic/line_of_sight
     cfg.place.name = 'PlaceCells';
     
     %% ==================== GridCells 参数 ====================
     cfg.grid.n = 30;                         % 细胞数量
-    cfg.grid.gridscale = [0.3, 0.5, 0.8];    % 网格尺度 (m), modules 分布
-    cfg.grid.orientation = [0, 0.1, 0.2];    % 方向 (rad), modules 分布
+    cfg.grid.gridscale = [1, 2, 4];    % 网格尺度 (m), modules 分布
+    cfg.grid.orientation = [0, pi/6, pi/3];    % 方向 (rad), modules 分布
     cfg.grid.phase_offset = [0, 2*pi];       % 相位偏移 (rad), uniform 分布
     cfg.grid.description = 'rectified_cosines';  % shifted_cosines 或 rectified_cosines
     cfg.grid.width_ratio = 4/(3*sqrt(3));    % 宽度比（仅 rectified_cosines）

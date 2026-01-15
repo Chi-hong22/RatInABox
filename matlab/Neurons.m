@@ -3,6 +3,7 @@ classdef Neurons < handle
     % input: 依赖 Agent 实例，提供位置/速度等状态
     % output: 提供 firingrate、history 等数据与更新方法
     % pos: 核心神经元模块，子类需实现 get_state() 方法
+    % 一旦我被更新，务必更新我的开头注释，以及所属的文件夹的md。
     %
     % 使用示例：
     %   neurons = PlaceCells(agent, params);  % 通过子类实例化
@@ -164,11 +165,11 @@ classdef Neurons < handle
                     hist_arrays.t = cell2mat(obj.history.t(:));  % 列向量
                     
                     % firingrate: 每个时间步是 n×1，堆叠为 T×n
-                    fr_cell = obj.history.firingrate;
+                    fr_cell = obj.history.firingrate(:);
                     hist_arrays.firingrate = cell2mat(cellfun(@(x) x(:)', fr_cell, 'UniformOutput', false));
                     
                     % spikes: 同上
-                    sp_cell = obj.history.spikes;
+                    sp_cell = obj.history.spikes(:);
                     hist_arrays.spikes = cell2mat(cellfun(@(x) x(:)', sp_cell, 'UniformOutput', false));
                 else
                     hist_arrays.t = [];

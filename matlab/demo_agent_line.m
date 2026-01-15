@@ -1,11 +1,15 @@
 % demo_agent_line.m - 完整 demo（直线轨迹 + Place/Grid cells）
+% input: config.m 与 matlab/data/agent_path.csv
+% output: 轨迹与发放率相关可视化图（通过 plot_utils 统一生成）
+% pos: MATLAB demo 脚本，串联环境/代理/神经元
+% 一旦我被更新，务必更新我的开头注释，以及所属的文件夹的md。
 %
 % 功能：
 %   1. 加载配置
 %   2. 创建环境和 Agent（从轨迹文件）
 %   3. 创建 PlaceCells 和 GridCells
 %   4. 运行更新循环
-%   5. 可视化 rate map 和时间序列
+%   5. 调用 plot_utils 进行可视化（轨迹、rate map、时间序列）
 %   6. 导出图片（paper-visual 规范）
 %
 % 使用：
@@ -88,154 +92,92 @@ end
 
 fprintf('   完成！总时长: %.2f 秒\n', agent.t);
 
-%% 6. 可视化：PlaceCells rate map
-fprintf('6. 绘制 PlaceCells rate map...\n');
+%% 6. 可视化：轨迹
+fprintf('6. 绘制 Agent 轨迹...\n');
 
-fig_pc_map = figure('Name', 'PlaceCells Rate Map');
-chosen = pcs.return_list_of_neurons(min(6, pcs.n));
-n_cols = min(length(chosen), 3);
-n_rows = ceil(length(chosen) / n_cols);
+fig_traj = plot_utils.plot_agent_trajectory(agent, ...
+    'fig_name', 'Agent Trajectory', ...
+    'fig_position', [40, 40, 600, 600], ...
+    'line_width', 1.5, ...
+    'marker_size', 6, ...
+    'title', 'Agent 轨迹', ...
+    'title_fontsize', 12, ...
+    'label_fontsize', 11, ...
+    'axis_fontsize', 10, ...
+    'apply_paper_visual', false);
 
-% 调整窗口大小
-set(fig_pc_map, 'Position', [50, 50, 1200, 400*n_rows]);
-set(fig_pc_map, 'Color', 'w');
+%% 7. 可视化：PlaceCells rate map
+fprintf('7. 绘制 PlaceCells rate map...\n');
 
-for i = 1:length(chosen)
-    ax = subplot(n_rows, n_cols, i);
-    
-    % 获取 rate map
-    rate_maps = pcs.get_state('evaluate_at', 'all');
-    rate_map = rate_maps(chosen(i), :);
-    
-    % 重塑为图像
-    H = size(env.discrete_coords, 1);
-    W = size(env.discrete_coords, 2);
-    rate_map = reshape(rate_map, H, W);
-    
-    % 绘制
-    imagesc(ax, env.extent([1, 2]), env.extent([3, 4]), rate_map);
-    set(ax, 'YDir', 'normal');
-    colormap(ax, cfg.plot.colormap);
-    axis(ax, 'equal', 'tight');
-    title(ax, sprintf('位置细胞 %d', chosen(i)), 'FontSize', 11);
-    
-    if mod(i-1, n_cols) == 0
-        ylabel(ax, 'y (m)', 'FontSize', 10);
-    end
-    if i > length(chosen) - n_cols
-        xlabel(ax, 'x (m)', 'FontSize', 10);
-    end
-    
-    % 调整位置
-    pos = get(ax, 'Position');
-    set(ax, 'Position', [pos(1)*1.02, pos(2)*1.08, pos(3)*0.9, pos(4)*0.85]);
-end
+% 选取要显示的 PlaceCells 神经元索引数量, 最多为6个或全部（如果不足6个）
+chosen = pcs.return_list_of_neurons(min(9, pcs.n)); % chosen 表示被选中的神经元
 
-% 不应用 paper-visual
-% paper_visual(fig_pc_map, cfg);
+% 布局相关变量：每行最多3个，将选中的神经元按行列排布
+n_cols = min(length(chosen), 3);   % n_cols 表示列数，最大为3
+n_rows = ceil(length(chosen) / n_cols);  % n_rows 表示行数，按需要分配
 
-% 导出
-if cfg.plot.export_enabled
-    export_path = fullfile(cfg.dir.output, 'placecells_ratemap');
-    paper_visual_export(fig_pc_map, export_path, cfg);
-end
+% 变量含义：
+% chosen  代表被选中的神经元索引列表
+% n_cols  每行的神经元数（列数）
+% n_rows  显示神经元所需的总行数
 
-%% 7. 可视化：GridCells rate map
-fprintf('7. 绘制 GridCells rate map...\n');
 
-fig_gc_map = figure('Name', 'GridCells Rate Map');
+export_path = fullfile(cfg.dir.output, 'placecells_ratemap');
+fig_pc_map = plot_utils.plot_rate_map(pcs, ...
+    'chosen_neurons', chosen, ...
+    'method', 'groundtruth', ...
+    'colormap', cfg.plot.colormap, ...
+    'colorbar', false, ...
+    'layout', 'tiled', ...
+    'n_cols', n_cols, ...
+    'fig_position', [50, 50, 1200, 400*n_rows], ...
+    'fig_name', 'PlaceCells Rate Map', ...
+    'title_prefix', '位置细胞', ...
+    'title_fontsize', 11, ...
+    'label_fontsize', 10, ...
+    'apply_paper_visual', false, ...
+    'export', export_path);
+
+%% 8. 可视化：GridCells rate map
+fprintf('8. 绘制 GridCells rate map...\n');
+
 chosen = gcs.return_list_of_neurons(min(6, gcs.n));
 n_cols = min(length(chosen), 3);
 n_rows = ceil(length(chosen) / n_cols);
 
-% 调整窗口大小
-set(fig_gc_map, 'Position', [100, 100, 1200, 400*n_rows]);
-set(fig_gc_map, 'Color', 'w');
+export_path = fullfile(cfg.dir.output, 'gridcells_ratemap');
+fig_gc_map = plot_utils.plot_rate_map(gcs, ...
+    'chosen_neurons', chosen, ...
+    'method', 'groundtruth', ...
+    'colormap', cfg.plot.colormap, ...
+    'colorbar', false, ...
+    'layout', 'tiled', ...
+    'n_cols', n_cols, ...
+    'fig_position', [100, 100, 1200, 400*n_rows], ...
+    'fig_name', 'GridCells Rate Map', ...
+    'title_prefix', '网格细胞', ...
+    'title_fontsize', 11, ...
+    'label_fontsize', 10, ...
+    'apply_paper_visual', false, ...
+    'export', export_path);
 
-for i = 1:length(chosen)
-    ax = subplot(n_rows, n_cols, i);
-    
-    % 获取 rate map
-    rate_maps = gcs.get_state('evaluate_at', 'all');
-    rate_map = rate_maps(chosen(i), :);
-    
-    % 重塑为图像
-    H = size(env.discrete_coords, 1);
-    W = size(env.discrete_coords, 2);
-    rate_map = reshape(rate_map, H, W);
-    
-    % 绘制
-    imagesc(ax, env.extent([1, 2]), env.extent([3, 4]), rate_map);
-    set(ax, 'YDir', 'normal');
-    colormap(ax, cfg.plot.colormap);
-    axis(ax, 'equal', 'tight');
-    title(ax, sprintf('网格细胞 %d', chosen(i)), 'FontSize', 11);
-    
-    if mod(i-1, n_cols) == 0
-        ylabel(ax, 'y (m)', 'FontSize', 10);
-    end
-    if i > length(chosen) - n_cols
-        xlabel(ax, 'x (m)', 'FontSize', 10);
-    end
-    
-    % 调整位置
-    pos = get(ax, 'Position');
-    set(ax, 'Position', [pos(1)*1.02, pos(2)*1.08, pos(3)*0.9, pos(4)*0.85]);
-end
+%% 9. 可视化：PlaceCells 时间序列
+fprintf('9. 绘制 PlaceCells 时间序列...\n');
 
-% 不应用 paper-visual
-% paper_visual(fig_gc_map, cfg);
+export_path = fullfile(cfg.dir.output, 'placecells_timeseries');
+fig_pc_ts = plot_utils.plot_rate_timeseries(pcs, ...
+    'chosen_neurons', 'all', ...
+    'fig_name', 'PlaceCells Timeseries', ...
+    'fig_position', [150, 150, 1000, 500], ...
+    'xlabel', '时间 (分钟)', ...
+    'ylabel', '神经元编号', ...
+    'title', '位置细胞发放率时间序列', ...
+    'line_width', 1.5, ...
+    'axis_fontsize', 10, ...
+    'apply_paper_visual', false, ...
+    'export', export_path);
 
-% 导出
-if cfg.plot.export_enabled
-    export_path = fullfile(cfg.dir.output, 'gridcells_ratemap');
-    paper_visual_export(fig_gc_map, export_path, cfg);
-end
-
-%% 8. 可视化：PlaceCells 时间序列
-fprintf('8. 绘制 PlaceCells 时间序列...\n');
-
-fig_pc_ts = figure('Name', 'PlaceCells Timeseries');
-% 调整窗口大小
-set(fig_pc_ts, 'Position', [150, 150, 1000, 500]);
-set(fig_pc_ts, 'Color', 'w');
-
-ax = axes(fig_pc_ts);
-
-hist = pcs.get_history_arrays();
-t = hist.t;
-chosen = pcs.return_list_of_neurons(min(5, pcs.n));
-rate_ts = hist.firingrate(:, chosen);  % T×N
-
-% 绘制（堆叠）
-for i = 1:length(chosen)
-    plot(ax, t / 60, rate_ts(:, i) + (i-1), 'LineWidth', 1.5);
-    hold(ax, 'on');
-end
-hold(ax, 'off');
-
-xlabel(ax, '时间 (分钟)', 'FontSize', 12);
-ylabel(ax, '神经元编号', 'FontSize', 12);
-ylim(ax, [-0.5, length(chosen) + 0.5]);
-yticks(ax, 0:(length(chosen)-1));
-yticklabels(ax, arrayfun(@num2str, chosen, 'UniformOutput', false));
-title(ax, '位置细胞发放率时间序列', 'FontSize', 13);
-set(ax, 'FontSize', 10);
-
-% 调整轴位置
-pos = get(ax, 'Position');
-set(ax, 'Position', [pos(1)*1.12, pos(2)*1.12, pos(3)*0.85, pos(4)*0.8]);
-
-% 不应用 paper-visual
-% paper_visual(fig_pc_ts, cfg);
-
-% 导出
-if cfg.plot.export_enabled
-    export_path = fullfile(cfg.dir.output, 'placecells_timeseries');
-    paper_visual_export(fig_pc_ts, export_path, cfg);
-end
-
-%% 9. 完成
+%% 10. 完成
 fprintf('\n====== Demo 结束 ======\n');
 if cfg.plot.export_enabled
     fprintf('图片已导出到: %s\n', cfg.dir.output);

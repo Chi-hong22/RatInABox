@@ -1,4 +1,9 @@
-% demo_gridcells_visual.m - GridCells 可视化 demo（无需 Agent）
+%% demo_gridcells_visual.m - GridCells 可视化 demo（无需 Agent）
+%
+% input: config.m, EnvironmentStub.m, GridCells.m
+% output: 网格细胞可视化窗口与可选导出图片
+% pos: GridCells 可视化 demo 脚本（无需 Agent 轨迹）
+% 一旦我被更新，务必更新我的开头注释，以及所属的文件夹的md。
 %
 % 功能：
 %   1. 创建"虚拟"环境和 Agent
@@ -31,7 +36,7 @@ fprintf('2. 创建虚拟环境与 Agent...\n');
 
 % 环境（使用 config 参数，但扩大范围以更好展示网格）
 env_params = struct(...
-    'extent', [0, 1.5, 0, 1.5], ...  % 特殊设置：比默认更大，便于展示网格模式
+    'extent', [0, 10, 0, 10], ...  % 特殊设置：比默认更大，便于展示网格模式
     'boundary_conditions', cfg.env.boundary_conditions, ...
     'dimensionality', cfg.env.dimensionality, ...
     'dx', cfg.env.dx);
@@ -42,7 +47,7 @@ agent = struct();
 agent.Environment = env;
 agent.dt = 0.01;
 agent.t = 0;
-agent.pos = [0.5, 0.5];  % 固定位置
+agent.pos = [5, 5];  % 固定位置
 agent.velocity = [0, 0];
 agent.head_direction = [1, 0];
 agent.speed_mean = 0.1;
@@ -54,11 +59,12 @@ fprintf('   环境范围: [%.1f, %.1f] x [%.1f, %.1f] 米\n', ...
 %% 3. 创建多组 GridCells（不同参数）
 fprintf('3. 创建多组 GridCells...\n');
 
-% 配置：3 个模块，不同尺度（特殊设置以展示效果）
-gridscales = [0.2, 0.4, 0.6];  % 特殊设置：更密集的尺度以便观察
-orientations = [0, 0.1, 0.2];  % 特殊设置：略微不同的方向
+% 配置：3 个尺度模块，不同尺度（特殊设置以展示效果）
+gridscales = [1, 2, 4];  % 特殊设置：更密集的尺度以便观察
+orientations = [0, pi/6, pi/3];  % 特殊设置：略微不同的方向
 n_modules = length(gridscales);
-n_per_module = 2;  % 每个模块 2 个细胞
+n_per_module = 5;  % 每个尺度模块 5 个细胞
+max_gridscale = max(gridscales);
 
 gcs_list = cell(n_modules, 1);
 for i = 1:n_modules
@@ -75,12 +81,12 @@ for i = 1:n_modules
         'max_fr', cfg.neurons.max_fr);                    % 从 config 读取
     
     gcs_list{i} = GridCells(agent, gc_params);
-    fprintf('   模块 %d: gridscale = %.2f m, orientation = %.2f rad\n', ...
+    fprintf('   尺度模块 %d: gridscale = %.2f m, orientation = %.2f rad\n', ...
         i, gridscales(i), orientations(i));
 end
 
-%% 4. 可视化：展示不同模块的 rate map
-fprintf('4. 绘制各模块 rate map...\n');
+%% 4. 可视化：展示不同尺度模块的 rate map
+fprintf('4. 绘制各尺度模块 rate map...\n');
 
 fig = figure('Name', 'GridCells Modules Visualization');
 % 调整窗口大小：增加高度以容纳标题和标签
@@ -112,7 +118,7 @@ for mod_idx = 1:n_modules
         axis(ax, 'equal', 'tight');
         
         % 标题（简化，避免多行）
-        title(ax, sprintf('模块%d 细胞%d (%.2fm)', ...
+        title(ax, sprintf('尺度模块%d 细胞%d (%.2fm)', ...
             mod_idx, cell_idx, gridscales(mod_idx)), 'FontSize', 11);
         
         % 标签
@@ -149,10 +155,10 @@ end
 %% 5. 可视化：单个 Grid cell 详细展示
 fprintf('5. 绘制单个 GridCell 细节...\n');
 
-% 创建单个 grid cell（使用 config 默认参数）
+% 创建单个 grid cell（使用演示中的最大尺度）
 gc_single_params = struct(...
     'n', 1, ...
-    'gridscale', cfg.grid.gridscale(1), ...               % 从 config 读取第一个模块尺度
+    'gridscale', max_gridscale, ...                       % 与图1一致：使用最大尺度
     'gridscale_distribution', 'delta', ...
     'orientation', 0.0, ...
     'orientation_distribution', 'delta', ...
@@ -183,7 +189,11 @@ colormap(ax, cfg.plot.colormap);
 axis(ax, 'equal', 'tight');
 xlabel(ax, 'x (m)', 'FontSize', 12);
 ylabel(ax, 'y (m)', 'FontSize', 12);
-title(ax, sprintf('网格细胞 (尺度=%.2f m)', gc_single.gridscales(1)), 'FontSize', 13);
+title(ax, sprintf('网格细胞 (尺度=%.2f m, 方向=%.2f rad, 相位=[%.2f, %.2f])', ...
+    gc_single.gridscales(1), ...
+    gc_single.orientations(1), ...
+    gc_single.phase_offsets(1, 1), ...
+    gc_single.phase_offsets(1, 2)), 'FontSize', 13);
 
 % 添加色条
 cb = colorbar(ax);
@@ -192,7 +202,7 @@ set(cb, 'FontSize', 10);
 
 % 调整轴位置以容纳色条
 pos = get(ax, 'Position');
-set(ax, 'Position', [pos(1)*1.1, pos(2)*1.15, pos(3)*0.75, pos(4)*0.75]);
+set(ax, 'Position', [pos(1)*1.1, pos(2)*1.1, pos(3)*0.95, pos(4)*0.95]);
 
 % 不应用 paper-visual
 % paper_visual(fig_single, cfg);
@@ -216,7 +226,7 @@ set(fig_types, 'Color', 'w');
 for i = 1:length(descriptions)
     gc_type_params = struct(...
         'n', 1, ...
-        'gridscale', cfg.grid.gridscale(1), ...           % 从 config 读取
+        'gridscale', max_gridscale, ...                   % 使用最大尺度
         'orientation', 0.0, ...
         'phase_offset', 0.0, ...                          % 特殊设置：固定相位以对比
         'description', descriptions{i}, ...               % 特殊设置：对比不同描述类型
@@ -242,7 +252,7 @@ for i = 1:length(descriptions)
     
     % 调整子图位置
     pos = get(ax, 'Position');
-    set(ax, 'Position', [pos(1)*1.05, pos(2)*1.15, pos(3)*0.85, pos(4)*0.75]);
+    set(ax, 'Position', [pos(1)*1.05, pos(2)*1.15, pos(3)*0.85, pos(4)*0.85]);
 end
 
 % 不应用 paper-visual
@@ -266,6 +276,6 @@ else
     fprintf('未导出图片（config.plot.export_enabled = false）。\n');
 end
 fprintf('\n图示内容:\n');
-fprintf('  1. 不同尺度模块的网格模式\n');
+fprintf('  1. 不同尺度尺度模块的网格模式\n');
 fprintf('  2. 单个网格细胞的细节\n');
 fprintf('  3. rectified 与 shifted cosines 对比\n');
