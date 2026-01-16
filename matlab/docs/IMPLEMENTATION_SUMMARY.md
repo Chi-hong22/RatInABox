@@ -3,19 +3,22 @@ input: MATLAB 端核心类与 demo 实现
 output: 实现清单、差异说明与更新记录
 pos: matlab/docs 实现摘要文档
 一旦我被更新，务必更新我的开头注释，以及所属的文件夹的md。
+最近更新：2026-01-16 15:00:33 demo 子图布局改为紧凑模式
 -->
 # MATLAB Port Implementation Summary
 
 ## 完成状态
 
 ✅ **所有计划任务已完成**
+🆕 **2026-01-16: 新增双余弦网格细胞类**
 
 ## 实现文件清单
 
-### 核心类（3 个）
+### 核心类（4 个）
 1. ✅ `Neurons.m` - 基类，handle 类型，实现更新/历史/缓存机制
 2. ✅ `PlaceCells.m` - Place cell 实现，支持 5 种激活函数
 3. ✅ `GridCells.m` - Grid cell 实现，支持 2D/1D、多模块、两种描述
+4. ✅ `GridCells2Cos.m` - 双余弦网格细胞（两余弦90°交叉，仅2D）
 
 ### 支撑类（2 个）
 4. ✅ `EnvironmentStub.m` - 简化环境，矩形/solid 边界
@@ -26,17 +29,18 @@ pos: matlab/docs 实现摘要文档
 7. ✅ `paper_visual.m` - 论文级可视化封装（2 个函数）
 8. ✅ `plot_utils.m` - 绘图工具函数（3 个函数）
 
-### Demo 脚本（2 个）
+### Demo 脚本（3 个）
 9. ✅ `demo_agent_line.m` - 完整 demo（Agent + Place/Grid cells）
 10. ✅ `demo_gridcells_visual.m` - Grid cells 可视化 demo
+11. ✅ `demo_gridcells2cos_visual.m` - 双余弦网格细胞可视化（对比三余弦）
 
 ### 数据与文档（4 个）
-11. ✅ `data/agent_path.csv` - 示例直线轨迹（81 步）
-12. ✅ `README.md` - 使用说明
-13. ✅ `VERIFICATION_CHECKLIST.md` - 验证清单
-14. ✅ `IMPLEMENTATION_SUMMARY.md` - 本文档
+1.  ✅ `data/agent_path.csv` - 示例梳状路径轨迹
+2.  ✅ `README.md` - 使用说明
+3.  ✅ `VERIFICATION_CHECKLIST.md` - 验证清单
+4.  ✅ `IMPLEMENTATION_SUMMARY.md` - 本文档
 
-**总计：14 个文件**
+**总计：16 个文件**
 
 ## 核心功能对照
 
@@ -61,6 +65,9 @@ pos: matlab/docs 实现摘要文档
 | - shifted_cosines | ✅ | 完成 | Solstad 2006 |
 | - modules 分布 | ✅ | 完成 | 多模块支持 |
 | - uniform 分布 | ✅ | 完成 | 随机采样 |
+| **GridCells2Cos** | | | |
+| - 2D 两余弦90° | ✅ | 完成 | 矩形/条纹网格 |
+| - rectified/shifted | ✅ | 完成 | 继承父类归一化逻辑 |
 | **绘图** | | | |
 | - rate map | ✅ | 完成 | imagesc + colormap |
 | - timeseries | ✅ | 完成 | 堆叠线图 |
@@ -216,4 +223,16 @@ ls('matlab/output/*.png');
   - 文档：README/VERIFICATION/SUMMARY
 - 2026-01-15: 历史数组整理修正
   - Neurons.get_history_arrays 保证历史矩阵为 T×n 形状
+- 2026-01-16 14:44:11: 新增双余弦网格细胞
+  - 新增 GridCells2Cos 类（继承 GridCells）
+  - 实现两余弦90°交叉算法（矩形网格模式）
+  - 新增 demo_gridcells2cos_visual.m 可视化脚本
+  - 更新 README、IMPLEMENTATION_SUMMARY、DOCS_INDEX 文档
+- 2026-01-16 14:55:46: 调整 GridCells 访问级别
+  - rotate_vec 改为 protected，供 GridCells2Cos 调用
+  - 更新 README、IMPLEMENTATION_SUMMARY、DOCS_INDEX 文档
+- 2026-01-16 15:00:33: Demo 布局紧凑化
+  - demo_gridcells_visual 使用 tiledlayout 紧凑布局
+  - demo_gridcells2cos_visual 使用 tiledlayout 紧凑布局
+  - 更新 README、IMPLEMENTATION_SUMMARY、DOCS_INDEX 文档
 

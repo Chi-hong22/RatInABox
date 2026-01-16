@@ -4,6 +4,7 @@
 % output: 网格细胞可视化窗口与可选导出图片
 % pos: GridCells 可视化 demo 脚本（无需 Agent 轨迹）
 % 一旦我被更新，务必更新我的开头注释，以及所属的文件夹的md。
+% 最近更新：2026-01-16 15:00:33 子图布局改为紧凑模式
 %
 % 功能：
 %   1. 创建"虚拟"环境和 Agent
@@ -93,14 +94,13 @@ fig = figure('Name', 'GridCells Modules Visualization');
 set(fig, 'Position', [100, 100, 1400, 550]);
 set(fig, 'Color', 'w');
 
+tiledlayout(fig, n_modules, n_per_module, 'Padding', 'compact', 'TileSpacing', 'compact');
 plot_idx = 1;
-axes_list = [];
 for mod_idx = 1:n_modules
     gcs = gcs_list{mod_idx};
     
     for cell_idx = 1:n_per_module
-        ax = subplot(n_modules, n_per_module, plot_idx);
-        axes_list = [axes_list, ax];
+        ax = nexttile(plot_idx);
         
         % 获取 rate map
         rate_maps = gcs.get_state('evaluate_at', 'all');
@@ -131,16 +131,6 @@ for mod_idx = 1:n_modules
         
         plot_idx = plot_idx + 1;
     end
-end
-
-% 手动调整子图间距，确保标题和标签显示完整
-for i = 1:length(axes_list)
-    ax = axes_list(i);
-    pos = get(ax, 'Position');
-    % 调整：[left, bottom, width, height]
-    % 增加底部和顶部空间，减少宽度以增加间距
-    new_pos = [pos(1)*1.02, pos(2)*1.1, pos(3)*0.88, pos(4)*0.82];
-    set(ax, 'Position', new_pos);
 end
 
 % 不应用 paper-visual，避免覆盖手动调整

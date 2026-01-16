@@ -4,6 +4,7 @@ classdef GridCells < Neurons
     % output: 基于位置的周期性六边形网格发放率
     % pos: Neurons 子类，实现周期性空间编码
     % 一旦我被更新，务必更新我的开头注释，以及所属的文件夹的md。
+    % 最近更新：2026-01-16 14:55:46 开放 rotate_vec 供子类使用
     %
     % ========== 生物学背景 ==========
     % Grid cells（网格细胞）是哺乳动物内嗅皮层（entorhinal cortex）中的一类
@@ -310,7 +311,7 @@ classdef GridCells < Neurons
         end
     end
     
-    methods (Static, Access = private)
+    methods (Static, Access = protected)
         function samples = distribution_sampler(dist_name, params, n, D)
             % 从分布采样
             % dist_name: 'modules', 'uniform', 'delta'
